@@ -4,6 +4,9 @@
     using System.Threading.Tasks;
 
     internal static partial class YouTubeInterface {
+        /// <returns>
+        /// An array of Playlist objects associated with the currently logged in user, or null if fetching playlists fails.
+        /// </returns>
         internal static async Task<Playlist[]?> FetchPlaylists() {
             Logger.Info("Fetching playlists.");
 
@@ -25,12 +28,16 @@
                 }
             } while (results.NextPageToken is not null);
 
+            Playlist[] playlistArray;
             try {
-                return playlists.ToArray();
+                playlistArray = playlists.ToArray();
             } catch (Exception e) {
                 Logger.Error(e);
                 return null;
             }
+
+            Logger.Info("Done fetching playlists.");
+            return playlistArray;
         }
 
         private static async Task<PlaylistListResponse?> FetchPlaylistPage(string? pageToken) {

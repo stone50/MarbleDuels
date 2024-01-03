@@ -11,7 +11,7 @@
         private static UserCredential? UserCredential { get; set; }
         private static YouTubeService? YouTubeService { get; set; }
 
-        private static readonly string[] Scopes = {
+        internal static readonly string[] Scopes = [
             YouTubeService.Scope.Youtube,
             YouTubeService.Scope.YoutubeChannelMembershipsCreator,
             YouTubeService.Scope.YoutubeForceSsl,
@@ -19,12 +19,22 @@
             YouTubeService.Scope.YoutubeUpload,
             YouTubeService.Scope.Youtubepartner,
             YouTubeService.Scope.YoutubepartnerChannelAudit
-        };
+        ];
 
+        /// <remarks>
+        /// This may require the user to manually provide authentication in their browser.
+        /// </remarks>
+        /// <returns>
+        /// A YouTubeService object, or null if authentication failed.
+        /// </returns>
         internal static async Task<YouTubeService?> GetYouTubeService() {
             Logger.Info("Getting YouTube service.");
 
-            if (YouTubeService is not null && IsUserCredentialValid()) {
+            if (
+                YouTubeService is not null &&
+                UserCredential is not null &&
+                !UserCredential.Token.IsExpired(SystemClock.Default)
+            ) {
                 return YouTubeService;
             }
 
@@ -48,28 +58,35 @@
             return service;
         }
 
-        private static bool IsUserCredentialValid() => UserCredential is not null && !UserCredential.Token.IsExpired(SystemClock.Default);
-
+        /// <remarks>
+        /// If UserCredential is null, this fetches the user's credentials,
+        /// which will require the user to manually provide authentication in their browser
+        /// if they have not authenticated before.
+        /// If UserCredential is expired, this refreshes the user's credentials,
+        /// which will require the user to manually provide authentication in their browser.
+        /// </remarks>
+        /// <returns>
+        /// Whether or not UserCredential is valid.
+        /// </returns>
         private static async Task<bool> ValidateUserCredential() {
-            Logger.Info("Validating user credential.");
-
             if (UserCredential is null) {
                 Logger.Info("User credential is null. Creating user credential.");
 
-                var secretFileStream = Util.OpenFile(Configuration.ClientSecretFilePath);
-                if (secretFileStream is null) {
-                    UserCredential = null;
-                    Logger.Warn($"Could not open \"{Configuration.ClientSecretFilePath}\".");
+                FileStream secretFileStream;
+                try {
+                    secretFileStream = new FileStream(Configuration.ClientSecretFileName, FileMode.Open, FileAccess.Read);
+                } catch (Exception e) {
+                    Logger.Error(e);
                     return false;
                 }
 
                 using (secretFileStream) {
-                    Logger.Info("Please provide authentication in your browser.");
+                    Logger.Info("You may need to provide authentication in your browser.");
                     try {
                         UserCredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                             GoogleClientSecrets.FromStream(secretFileStream).Secrets,
                             Scopes,
-                            Configuration.GetValueFromPath("youtube.user"),
+                            Configuration.GetValue("youtube.user"),
                             CancellationToken.None
                         );
                     } catch (Exception e) {
@@ -81,9 +98,7 @@
             }
 
             if (UserCredential.Token.IsExpired(SystemClock.Default)) {
-                Logger.Info("User credential is expired. Refreshing user credential.");
-
-                Logger.Info("Please provide authentication in your browser.");
+                Logger.Info("User credential is expired. Please provide authentication in your browser.");
 
                 if (!await UserCredential.RefreshTokenAsync(CancellationToken.None)) {
                     UserCredential = null;
@@ -92,7 +107,6 @@
                 }
             }
 
-            Logger.Info("User credential is valid.");
             return true;
         }
     }

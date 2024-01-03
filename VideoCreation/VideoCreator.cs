@@ -1,8 +1,17 @@
 ﻿namespace MarbleDuels.VideoCreation {
 
     internal abstract class VideoCreator {
+        /// <summary>
+        /// The root directory for generated video files.
+        /// </summary>
         internal static string? VideoDir { get; private set; }
 
+        /// <summary>
+        /// Initializes the root directory for generated video files.
+        /// </summary>
+        /// <remarks>
+        /// Creates a new directory if an existing one is not found.
+        /// </remarks>
         internal static bool Initialize() {
             Logger.Info("Initializing video creation.");
 
@@ -14,15 +23,12 @@
             }
 
             if (!Directory.Exists(VideoDir)) {
-                Logger.Info($"Could not find directory \"{VideoDir}\". Creating new directory.");
                 try {
                     _ = Directory.CreateDirectory(VideoDir);
                 } catch (Exception e) {
                     Logger.Error(e);
                     return false;
                 }
-
-                Logger.Info($"Done creating directory \"{VideoDir}\".");
             }
 
             Logger.Info("Done initializing video creation.");

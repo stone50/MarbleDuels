@@ -6,8 +6,14 @@
     using System.Threading.Tasks;
 
     internal static partial class YouTubeInterface {
+        /// <param name="filePath">
+        /// The file path of the video file to upload.
+        /// </param>
+        /// <returns>
+        /// A Video object associated with the uploaded video, or null if video upload failed.
+        /// </returns>
         internal static async Task<Video?> UploadVideo(string filePath, Video settings) {
-            Logger.Info($"Beginning upload process for \"{settings.Snippet.Title}\".");
+            Logger.Info($"Beginning upload process for '{settings.Snippet.Title}'.");
 
             var youTubeService = await GetYouTubeService();
             if (youTubeService is null) {
@@ -15,9 +21,11 @@
                 return null;
             }
 
-            var fileStream = Util.OpenFile(filePath);
-            if (fileStream is null) {
-                Logger.Warn($"Could not open \"{filePath}\".");
+            FileStream fileStream;
+            try {
+                fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            } catch (Exception e) {
+                Logger.Error(e);
                 return null;
             }
 
@@ -30,7 +38,6 @@
             }
 
             IUploadProgress progress;
-            Logger.Info($"Uploading \"{settings.Snippet.Title}\".");
             try {
                 progress = await videosInsertRequest.UploadAsync();
             } catch (Exception e) {
@@ -46,7 +53,7 @@
                 return null;
             }
 
-            Logger.Info($"Finished upload process for \"{settings.Snippet.Title}\".");
+            Logger.Info($"Finished upload process for '{videosInsertRequest.ResponseBody.Snippet.Title}'.");
             return videosInsertRequest.ResponseBody;
         }
     }

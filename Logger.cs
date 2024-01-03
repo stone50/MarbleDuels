@@ -3,10 +3,27 @@
     using System.Collections.Generic;
 
     internal static class Logger {
-        private static readonly Queue<string> MessageQueue = new();
-        private static bool Dumping = false;
-        private static string? LogFilePath;
+        /*
+         * Because this program utilizes asynchronous operations,
+         * logs are first added to a queue, then the queue's contents
+         * are written to the log file.
+         */
 
+        private static readonly Queue<string> MessageQueue = new();
+        private static bool Dumping { get; set; } = false;
+        internal static string? LogFilePath { get; private set; }
+
+        /// <summary>
+        /// Initializes the root directory for log files.
+        /// Creates a new log file for this run, titled with the current time in UTC.
+        /// </summary>
+        /// <remarks>
+        /// Creates a new directory if an existing one is not found.
+        /// If this fails, logs are still written to the console.
+        /// </remarks>
+        /// <returns>
+        /// Whether or not initialization is successful.
+        /// </returns>
         internal static bool Initialize() {
             Info("Initializing logger.");
 
@@ -83,9 +100,24 @@
             return true;
         }
 
+        /// <summary>
+        /// Logs the message at debug level.
+        /// </summary>
         internal static void Debug(object message) => LogLevel("DEBUG", message);
+
+        /// <summary>
+        /// Logs the message at information level.
+        /// </summary>
         internal static void Info(object message) => LogLevel("INFO", message);
+
+        /// <summary>
+        /// Logs the message at warning level.
+        /// </summary>
         internal static void Warn(object message) => LogLevel("WARN", message);
+
+        /// <summary>
+        /// Logs the message at error level.
+        /// </summary>
         internal static void Error(object message) => LogLevel("ERROR", message);
     }
 }

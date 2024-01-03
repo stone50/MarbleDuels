@@ -6,6 +6,7 @@
 
         public override readonly string ToString() => $"{ResolutionWidth}x{ResolutionHeight} {FrameRate} fps";
 
+        #region Commonly Used Settings
         internal static readonly VideoCreationSettings UHD4320p60fps = new() {
             ResolutionWidth = 7680,
             ResolutionHeight = 4320,
@@ -83,6 +84,6 @@
             ResolutionHeight = 240,
             FrameRate = 30
         };
-
+        #endregion Commonly Used Settings
     }
 }

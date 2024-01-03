@@ -29,15 +29,15 @@
                 return null;
             }
 
-            var projectPath = Configuration.GetValueFromPath(ConfigProjectPath);
+            var projectPath = Configuration.GetValue(ConfigProjectPath);
             if (projectPath is null) {
-                Logger.Warn($"Could not find project path \"{ConfigProjectPath}\" in \"{Configuration.ConfigFilePath}\".");
+                Logger.Warn($"Could not find project path \"{ConfigProjectPath}\" in \"{Configuration.ConfigFileName}\".");
                 return null;
             }
 
             var configMaxSeconds = Configuration.GetValue("max_video_seconds");
             if (configMaxSeconds is null) {
-                Logger.Warn($"Could not find max_video_seconds in \"{Configuration.ConfigFilePath}\".");
+                Logger.Warn($"Could not find max_video_seconds in \"{Configuration.ConfigFileName}\".");
                 return null;
             }
 

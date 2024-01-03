@@ -16,8 +16,11 @@
         }
 
         /// <summary>
-        /// Creates a new directory, then creates a new video using videoCreator.
+        /// Creates a new directory for videoCreator, then creates a new video using videoCreator.
         /// </summary>
+        /// <remarks>
+        /// The created directory will be deleted if video creation is not successful.
+        /// </remarks>
         /// <returns>
         /// A VideoCreationResults object, or null if creation failed.
         /// </returns>
@@ -41,7 +44,13 @@
             var videoFilePath = await videoCreator.CreateVideo(videoWorkingDirPath, settings);
             if (videoFilePath is null) {
                 Logger.Warn($"Could not create video in \"{videoWorkingDirPath}\".");
-                _ = Util.DeleteDir(videoWorkingDirPath);
+
+                try {
+                    Directory.Delete(videoWorkingDirPath, true);
+                } catch (Exception e) {
+                    Logger.Error(e);
+                }
+
                 return null;
             }
 

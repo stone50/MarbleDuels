@@ -1,21 +1,36 @@
 ﻿namespace MarbleDuels {
-    using Testing;
     using VideoCreation;
-    using YTInterface;
 
     internal class Program {
         private static async Task Main(string[] args) {
             if (!Logger.Initialize()) {
                 Logger.Warn("Could not initialize logger.");
+                /*
+                 * If the logger fails to initialize,
+                 * logs will still be written to the console.
+                 * If this is not acceptable, uncomment the following:
+                 */
+                // Environment.Exit(1);
             }
 
             if (!Configuration.Initialize()) {
-                Logger.Error("Could not initialize configuration.");
-                Environment.Exit(1);
+                Logger.Warn("Could not initialize configuration.");
+                /*
+                 * If the configuration fails to initialize,
+                 * some functionality will fail, but not crash.
+                 * If this is not acceptable, uncomment the following:
+                 */
+                // Environment.Exit(1);
             }
 
             if (!VideoCreator.Initialize()) {
                 Logger.Warn("Could not initialize video creation.");
+                /*
+                 * If the video creator fails to initialize,
+                 * creating videos with VideoCreator objects will fail, but not crash.
+                 * If this is not acceptable, uncomment the following:
+                 */
+                // Environment.Exit(1);
             }
 
             /*var playlists = await YouTubeInterface.FetchPlaylists();
