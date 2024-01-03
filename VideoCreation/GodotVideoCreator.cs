@@ -29,7 +29,7 @@
                 return null;
             }
 
-            var projectPath = Configuration.GetValue(ConfigProjectPath);
+            var projectPath = Configuration.GetValue($"godot.{ConfigProjectPath}");
             if (projectPath is null) {
                 Logger.Warn($"Could not find project path \"{ConfigProjectPath}\" in \"{Configuration.ConfigFileName}\".");
                 return null;

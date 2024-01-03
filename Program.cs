@@ -1,5 +1,6 @@
 ﻿namespace MarbleDuels {
     using VideoCreation;
+    using Testing;
 
     internal class Program {
         private static async Task Main(string[] args) {
@@ -38,12 +39,12 @@
                 foreach (var playlist in playlists) {
                     Logger.Debug($"{playlist.Snippet.Title}: {playlist.Id}");
                 }
-            }
+            }*/
 
             _ = await new Tester(
                 new GodotVideoCreator("race_to_the_bottom_project_path"),
                 VideoCreationSettings.SD240p30fps
-            ).CreateAndUpload();*/
+            ).CreateVideo();
         }
     }
 }
