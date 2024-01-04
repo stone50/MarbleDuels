@@ -59,9 +59,8 @@
         }
 
         private static bool Log(string message) {
-            Console.WriteLine(message);
-
             if (LogFilePath is null) {
+                Console.WriteLine(message);
                 return false;
             }
 
@@ -69,6 +68,7 @@
             try {
                 logStream = new StreamWriter(LogFilePath, true);
             } catch (Exception e) {
+                Console.WriteLine(message);
                 Console.WriteLine(e);
                 return false;
             }
@@ -76,6 +76,8 @@
             using (logStream) {
                 logStream.WriteLine(message);
             }
+
+            Console.WriteLine(message);
 
             return true;
         }

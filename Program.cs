@@ -1,6 +1,6 @@
 ﻿namespace MarbleDuels {
-    using VideoCreation;
     using Testing;
+    using VideoCreation;
 
     internal class Program {
         private static async Task Main(string[] args) {
