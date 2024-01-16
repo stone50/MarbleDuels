@@ -4,7 +4,7 @@
 
     internal static partial class YouTubeInterface {
         /// <returns>
-        /// An array of Playlist objects associated with the currently logged in user, or null if fetching playlists fails.
+        /// An array of Playlist objects associated with the currently authenticated channel, or null if fetching playlists fails.
         /// </returns>
         internal static async Task<Playlist[]?> FetchPlaylists() {
             Logger.Info("Fetching playlists.");
