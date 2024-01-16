@@ -1,6 +1,4 @@
 ﻿namespace MarbleDuels.VideoCreation {
-    using Google.Apis.YouTube.v3.Data;
-    using MarbleDuels.YTInterface;
     using System;
     using System.Threading.Tasks;
 
@@ -8,11 +6,6 @@
         internal class VideoCreationResults {
             internal string VideoFilePath = "";
             internal string VideoDirPath = "";
-        }
-
-        internal class VideoCreationAndUploadResults {
-            internal VideoCreationResults? CreationResults;
-            internal Video? UploadedVideo;
         }
 
         /// <summary>
@@ -58,32 +51,6 @@
             return new() {
                 VideoFilePath = videoFilePath,
                 VideoDirPath = videoWorkingDirPath
-            };
-        }
-
-        /// <returns>
-        /// A VideoCreationAndUploadResults object.
-        /// If video creation failed, CreationResults will be null.
-        /// If the upload failed, UploadedVideo will be null.
-        /// </returns>
-        internal static async Task<VideoCreationAndUploadResults> CreateAndUpload(VideoCreator videoCreator, VideoCreationSettings creationSettings, Video uploadSettings) {
-            var videoCreationResults = await CreateVideo(videoCreator, creationSettings);
-            if (videoCreationResults is null) {
-                Logger.Warn($"Could not create '{creationSettings}' video using '{videoCreator.GetType().Name}' creator.");
-                return new();
-            }
-
-            var uploadedVideo = await YouTubeInterface.UploadVideo(videoCreationResults.VideoFilePath, uploadSettings);
-            if (uploadedVideo is null) {
-                Logger.Warn($"Could not upload '{creationSettings}' video using '{videoCreator.GetType().Name}' creator.");
-                return new() {
-                    CreationResults = videoCreationResults
-                };
-            }
-
-            return new() {
-                CreationResults = videoCreationResults,
-                UploadedVideo = uploadedVideo
             };
         }
     }

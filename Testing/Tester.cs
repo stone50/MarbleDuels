@@ -1,6 +1,7 @@
 ﻿namespace MarbleDuels.Testing {
     using Google.Apis.YouTube.v3.Data;
     using MarbleDuels.VideoCreation;
+    using MarbleDuels.YTInterface;
     using System.Threading.Tasks;
 
     internal class Tester {
@@ -9,8 +10,6 @@
         internal string VideoCreatorName { get; }
         internal string VideoCreationSettingsDescription { get; }
 
-        // TODO: add videos to Testing playlist
-
         internal Tester(VideoCreator videoCreator, VideoCreationSettings videoCreationSettings) {
             VideoCreator = videoCreator;
             VideoCreationSettings = videoCreationSettings;
@@ -18,20 +17,27 @@
             VideoCreationSettingsDescription = $"{VideoCreationSettings.ResolutionWidth}x{VideoCreationSettings.ResolutionHeight} {VideoCreationSettings.FrameRate}fps";
         }
 
-        internal async Task<VideoCreation.VideoCreationResults?> CreateVideo() {
+        internal async Task<bool> CreateVideo() {
             return await VideoCreation.CreateVideo(
                 VideoCreator,
                 VideoCreationSettings
-            );
+            ) is not null;
         }
 
-        internal async Task<VideoCreation.VideoCreationAndUploadResults> CreateAndUpload() {
-            return await VideoCreation.CreateAndUpload(
+        internal async Task<bool> CreateAndUpload() {
+            var videoCreationResults = await VideoCreation.CreateVideo(
                 VideoCreator,
-                VideoCreationSettings,
+                VideoCreationSettings
+            );
+            if (videoCreationResults is null) {
+                return false;
+            }
+
+            var uploadedVideo = await YouTubeInterface.UploadVideo(
+                videoCreationResults.VideoFilePath,
                 new() {
                     Snippet = new() {
-                        Title = $"{VideoCreatorName} Single Upload",
+                        Title = VideoCreatorName,
                         Description = VideoCreationSettingsDescription
                     },
                     Status = new VideoStatus {
@@ -39,39 +45,40 @@
                     }
                 }
             );
-        }
-
-        internal Task<VideoCreation.VideoCreationResults?>[] CreateMultipleVideos(int numVideos) {
-            var tasks = new Task<VideoCreation.VideoCreationResults?>[numVideos];
-            for (var i = 0; i < numVideos; i++) {
-                tasks[i] = VideoCreation.CreateVideo(
-                    VideoCreator,
-                    VideoCreationSettings
-                );
+            if (uploadedVideo is null) {
+                return false;
             }
 
-            return tasks;
-        }
-
-        internal Task<VideoCreation.VideoCreationAndUploadResults>[] CreateAndUploadMultiple(int numVideos) {
-            var tasks = new Task<VideoCreation.VideoCreationAndUploadResults>[numVideos];
-            for (var i = 0; i < numVideos; i++) {
-                tasks[i] = VideoCreation.CreateAndUpload(
-                    VideoCreator,
-                    VideoCreationSettings,
-                    new() {
-                        Snippet = new() {
-                            Title = $"{VideoCreatorName} Multi Upload {i}",
-                            Description = VideoCreationSettingsDescription
-                        },
-                        Status = new VideoStatus {
-                            PrivacyStatus = "private"
-                        }
-                    }
-                );
+            var testingPlaylistId = Configuration.GetValue("youtube.testing_playlist_id");
+            if (testingPlaylistId is null) {
+                return false;
             }
 
-            return tasks;
+            var playlistItem = await YouTubeInterface.AddVideoToPlaylist(uploadedVideo.Id, testingPlaylistId);
+
+            return playlistItem is not null;
+        }
+
+        internal bool CreateMultipleVideos(int numVideos) {
+            var tasks = new Task<bool>[numVideos];
+            for (var i = 0; i < numVideos; i++) {
+                tasks[i] = CreateVideo();
+            }
+
+            Task.WaitAll(tasks);
+
+            return tasks.All(task => task.Result);
+        }
+
+        internal bool CreateAndUploadMultiple(int numVideos) {
+            var tasks = new Task<bool>[numVideos];
+            for (var i = 0; i < numVideos; i++) {
+                tasks[i] = CreateAndUpload();
+            }
+
+            Task.WaitAll(tasks);
+
+            return tasks.All(task => task.Result);
         }
     }
 }

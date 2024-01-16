@@ -1,27 +1,48 @@
 ﻿namespace MarbleDuels.YTInterface {
+    using Google.Apis.YouTube.v3;
+    using Google.Apis.YouTube.v3.Data;
+
     internal static partial class YouTubeInterface {
-        // TODO
-        /*internal static async Task<bool> AddVideoToPlaylist(string videoId, string playlistId) {
+        /// <param name="position">
+        /// The position in the playlist to insert the video.
+        /// </param>
+        internal static async Task<PlaylistItem?> AddVideoToPlaylist(string videoId, string playlistId) {
             Logger.Info($"Moving video {videoId} to playlist {playlistId}.");
 
             var youTubeService = await GetYouTubeService();
             if (youTubeService is null) {
                 Logger.Warn("YouTube service is null.");
-                return false;
+                return null;
             }
 
-            PlaylistItemsResource.InsertRequest playlistItemsInsertRequest;
+            var playlistItem = new PlaylistItem {
+                Snippet = new() {
+                    PlaylistId = playlistId,
+                    ResourceId = new() {
+                        Kind = "youtube#video",
+                        VideoId = videoId
+                    }
+                }
+            };
+
+            PlaylistItemsResource.InsertRequest playlistItemInsertRequest;
             try {
-                playlistItemsInsertRequest = youTubeService.PlaylistItems.Insert("contentDetails,id,snippet,status");
+                playlistItemInsertRequest = youTubeService.PlaylistItems.Insert(playlistItem, "snippet");
             } catch (Exception e) {
                 Logger.Error(e);
-                return false;
+                return null;
             }
 
-            //await playlistItemsInsertRequest.ExecuteAsync();
+            PlaylistItem addedVideo;
+            try {
+                addedVideo = await playlistItemInsertRequest.ExecuteAsync();
+            } catch (Exception e) {
+                Logger.Error(e);
+                return null;
+            }
 
-            Logger.Info($"Finished upload process for \"{settings.Snippet.Title}\".");
-            return true;
-        }*/
+            Logger.Info($"Moved video '{addedVideo.Snippet.Title}' to playlist '{addedVideo.Snippet.PlaylistId}'.");
+            return addedVideo;
+        }
     }
 }
