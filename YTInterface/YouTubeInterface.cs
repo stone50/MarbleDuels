@@ -53,6 +53,8 @@
                 return null;
             }
 
+            YouTubeService = service;
+
             Logger.Info("Done getting YouTube service.");
             return service;
         }
