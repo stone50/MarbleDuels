@@ -1,7 +1,6 @@
 ﻿namespace MarbleDuels.YTInterface {
     using Google.Apis.Auth.OAuth2;
     using Google.Apis.Services;
-    using Google.Apis.Util;
     using Google.Apis.YouTube.v3;
     using System.Reflection;
     using System.Threading;
@@ -33,7 +32,7 @@
             if (
                 YouTubeService is not null &&
                 UserCredential is not null &&
-                !UserCredential.Token.IsExpired(SystemClock.Default)
+                !UserCredential.Token.IsStale
             ) {
                 return YouTubeService;
             }
@@ -80,24 +79,24 @@
                     return false;
                 }
 
-                using (secretFileStream) {
-                    Logger.Info("You may need to provide authentication in your browser.");
-                    try {
+                Logger.Info("You may need to provide authentication in your browser.");
+                try {
+                    using (secretFileStream) {
                         UserCredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                             GoogleClientSecrets.FromStream(secretFileStream).Secrets,
                             Scopes,
                             Configuration.GetValue("youtube.user"),
                             CancellationToken.None
                         );
-                    } catch (Exception e) {
-                        UserCredential = null;
-                        Logger.Error(e);
-                        return false;
                     }
+                } catch (Exception e) {
+                    UserCredential = null;
+                    Logger.Error(e);
+                    return false;
                 }
             }
 
-            if (UserCredential.Token.IsExpired(SystemClock.Default)) {
+            if (UserCredential.Token.IsStale) {
                 Logger.Info("User credential is expired. Please provide authentication in your browser.");
 
                 if (!await UserCredential.RefreshTokenAsync(CancellationToken.None)) {

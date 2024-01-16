@@ -1,6 +1,5 @@
 ﻿namespace MarbleDuels.YTInterface {
     using Google.Apis.YouTube.v3.Data;
-    using System.Linq;
     using System.Threading.Tasks;
 
     internal static partial class YouTubeInterface {
@@ -10,7 +9,7 @@
         internal static async Task<Playlist[]?> FetchPlaylists() {
             Logger.Info("Fetching playlists.");
 
-            var playlists = Array.Empty<Playlist>();
+            Playlist[] playlists = [];
             PlaylistListResponse? results = null;
             do {
                 results = await FetchPlaylistPage(results?.NextPageToken);
@@ -20,24 +19,11 @@
                     return null;
                 }
 
-                try {
-                    playlists = playlists.Concat(results.Items).ToArray();
-                } catch (Exception e) {
-                    Logger.Error(e);
-                    return null;
-                }
+                playlists = [.. playlists, .. results.Items];
             } while (results.NextPageToken is not null);
 
-            Playlist[] playlistArray;
-            try {
-                playlistArray = playlists.ToArray();
-            } catch (Exception e) {
-                Logger.Error(e);
-                return null;
-            }
-
             Logger.Info("Done fetching playlists.");
-            return playlistArray;
+            return playlists;
         }
 
         private static async Task<PlaylistListResponse?> FetchPlaylistPage(string? pageToken) {
