@@ -31,7 +31,6 @@
                 }
             }
 
-            Logger.Info("Done initializing video creation.");
             return true;
         }
 

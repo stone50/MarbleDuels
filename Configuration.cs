@@ -26,7 +26,6 @@
                 return false;
             }
 
-            Logger.Info("Done initializing configuration.");
             return true;
         }
 
@@ -41,8 +40,6 @@
         /// The configuration value as a string at the given path, or null if getting the value failed.
         /// </returns>
         internal static string? GetValue(string path) {
-            Logger.Info($"Getting configuration value from path '{path}'.");
-
             if (Config is null) {
                 Logger.Warn("Configuration not initialized.");
                 return null;
@@ -54,7 +51,7 @@
                 var nextSection = currentSection.GetSection(sections[i]);
 
                 if (nextSection is null) {
-                    Logger.Warn($"Could not find section '{sections[i]}' in '{path}'.");
+                    Logger.Warn($"Could not find configuration section '{sections[i]}' in '{path}'.");
                     return null;
                 }
 
@@ -63,11 +60,10 @@
 
             var value = currentSection.GetSection(sections.Last()).Value;
             if (value is null) {
-                Logger.Warn($"Could not find value '{sections.Last()}' in '{path}'.");
+                Logger.Warn($"Could not find configuration value '{sections.Last()}' in '{path}'.");
                 return null;
             }
 
-            Logger.Info($"Done getting configuration value from path '{path}'.");
             return value;
         }
     }

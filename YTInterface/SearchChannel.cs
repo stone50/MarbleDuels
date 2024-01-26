@@ -22,7 +22,6 @@
                 results = [.. results, .. pageResults.Items];
             } while (pageResults.NextPageToken is not null);
 
-            Logger.Info("Done searching channel.");
             return results;
         }
 
