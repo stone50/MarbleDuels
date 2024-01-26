@@ -27,7 +27,7 @@
 
             PlaylistItemsResource.InsertRequest playlistItemInsertRequest;
             try {
-                playlistItemInsertRequest = youTubeService.PlaylistItems.Insert(playlistItem, "snippet");
+                playlistItemInsertRequest = youTubeService.PlaylistItems.Insert(playlistItem, "contentDetails,id,snippet");
             } catch (Exception e) {
                 Logger.Error(e);
                 return null;
@@ -41,7 +41,6 @@
                 return null;
             }
 
-            Logger.Info($"Moved video '{addedVideo.Snippet.Title}' to playlist '{addedVideo.Snippet.PlaylistId}'.");
             return addedVideo;
         }
     }

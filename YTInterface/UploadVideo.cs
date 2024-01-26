@@ -13,7 +13,7 @@
         /// A Video object associated with the uploaded video, or null if video upload failed.
         /// </returns>
         internal static async Task<Video?> UploadVideo(string filePath, Video settings) {
-            Logger.Info($"Beginning upload process for '{settings.Snippet.Title}'.");
+            Logger.Info($"Uploading '{settings.Snippet.Title}'.");
 
             var youTubeService = await GetYouTubeService();
             if (youTubeService is null) {
@@ -31,7 +31,7 @@
 
             VideosResource.InsertMediaUpload videosInsertRequest;
             try {
-                videosInsertRequest = youTubeService.Videos.Insert(settings, "contentDetails,fileDetails,id,liveStreamingDetails,localizations,player,processingDetails,recordingDetails,snippet,statistics,status,suggestions,topicDetails", fileStream, "video/*");
+                videosInsertRequest = youTubeService.Videos.Insert(settings, "id,localizations,recordingDetails,snippet,status", fileStream, "video/*");
             } catch (Exception e) {
                 Logger.Error(e);
                 return null;
@@ -53,7 +53,6 @@
                 return null;
             }
 
-            Logger.Info($"Finished upload process for '{videosInsertRequest.ResponseBody.Snippet.Title}'.");
             return videosInsertRequest.ResponseBody;
         }
     }

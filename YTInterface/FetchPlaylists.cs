@@ -22,7 +22,6 @@
                 playlists = [.. playlists, .. results.Items];
             } while (results.NextPageToken is not null);
 
-            Logger.Info("Done fetching playlists.");
             return playlists;
         }
 
@@ -33,7 +32,7 @@
                 return null;
             }
 
-            var playlistFetchRequest = youTubeService.Playlists.List("contentDetails,id,localizations,player,snippet,status");
+            var playlistFetchRequest = youTubeService.Playlists.List("contentDetails,id,localizations,snippet");
             playlistFetchRequest.Mine = true;
             playlistFetchRequest.PageToken = pageToken;
 
