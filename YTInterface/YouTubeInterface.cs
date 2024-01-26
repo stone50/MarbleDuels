@@ -27,8 +27,6 @@
         /// A YouTubeService object, or null if authentication failed.
         /// </returns>
         internal static async Task<YouTubeService?> GetYouTubeService() {
-            Logger.Info("Getting YouTube service.");
-
             if (
                 YouTubeService is not null &&
                 UserCredential is not null &&
@@ -55,7 +53,6 @@
 
             YouTubeService = service;
 
-            Logger.Info("Done getting YouTube service.");
             return service;
         }
 
@@ -70,8 +67,8 @@
         /// Whether or not UserCredential is valid.
         /// </returns>
         private static async Task<bool> ValidateUserCredential() {
-            if (UserCredential is null) {
-                Logger.Info("User credential is null. Creating user credential.");
+            if (UserCredential is null || UserCredential.Token.IsStale) {
+                Logger.Info("User credential is null or expired. You may need to provide authentication in your browser.");
 
                 FileStream secretFileStream;
                 try {
@@ -81,7 +78,6 @@
                     return false;
                 }
 
-                Logger.Info("You may need to provide authentication in your browser.");
                 try {
                     using (secretFileStream) {
                         UserCredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
@@ -94,16 +90,6 @@
                 } catch (Exception e) {
                     UserCredential = null;
                     Logger.Error(e);
-                    return false;
-                }
-            }
-
-            if (UserCredential.Token.IsStale) {
-                Logger.Info("User credential is expired. Please provide authentication in your browser.");
-
-                if (!await UserCredential.RefreshTokenAsync(CancellationToken.None)) {
-                    UserCredential = null;
-                    Logger.Warn("User credential refresh was not successful.");
                     return false;
                 }
             }
