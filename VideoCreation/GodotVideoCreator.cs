@@ -1,4 +1,5 @@
 ﻿namespace MarbleDuels.VideoCreation {
+    using MarbleDuels.Utils;
     using System;
     using System.Threading.Tasks;
 
@@ -53,20 +54,16 @@
                 return null;
             }
 
-            var godotCommand = $"{(Mono ? "godot-mono" : "godot")} --path \"{projectPath}\" --write-movie \"{outputFilePath}\" --resolution {settings.ResolutionWidth}x{settings.ResolutionHeight} --fixed-fps {settings.FrameRate} --quit-after {maxSeconds * settings.FrameRate}";
+            var godot = Mono ? "godot-mono" : "godot";
+            var path = $"--path \"{projectPath}\"";
+            var writeMovie = $"--write-movie \"{outputFilePath}\"";
+            var resolution = $"--resolution {settings.ResolutionWidth}x{settings.ResolutionHeight}";
+            var fixedFps = $"--fixed-fps {settings.FrameRate}";
+            var quitAfter = $"--quit-after {maxSeconds * settings.FrameRate}";
 
-            Logger.Info($"Executing '{godotCommand}'.");
-            System.Diagnostics.Process godotProcess;
-            try {
-                godotProcess = System.Diagnostics.Process.Start("CMD.exe", $"/C {godotCommand}");
-            } catch (Exception e) {
-                Logger.Error(e);
-                return null;
-            }
+            var exitCode = await Util.RunCMD($"{godot} {path} {writeMovie} {resolution} {fixedFps} {quitAfter}");
 
-            await godotProcess.WaitForExitAsync();
-
-            if (godotProcess.ExitCode != 0) {
+            if (exitCode != 0) {
                 Logger.Warn("Godot did not exit cleanly.");
                 return null;
             }

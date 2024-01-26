@@ -45,4 +45,4 @@ if (await YouTubeInterface.GetYouTubeService() is null) {
 }
 
 var tester = new Tester(new GodotVideoCreator("race_to_the_bottom_project_path", true), VideoCreationSettings.SD240p30fps);
-Logger.Debug(await tester.CreateAndUpload());
+Logger.Debug(tester.CreateMultipleVideos(3));
