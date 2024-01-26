@@ -39,4 +39,4 @@ The `godot` object is used to contain file paths to Godot projects. These paths 
 ---
 
 ### Godot Command Line
-In order to work with Godot, follow [Godot's guide](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html#path) for adding `godot-mono` to your `path` environment variable.
+In order to work with Godot, follow [Godot's guide](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html#path) for adding `godot` or `godot-mono` to your `path` environment variable.
